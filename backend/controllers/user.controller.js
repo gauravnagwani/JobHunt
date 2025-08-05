@@ -40,7 +40,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
-    if (!email || !password || role) {
+    if (!email || !password || !role) {
       return res.status(400).json({
         message: "Something is missing",
         success: false,
@@ -75,7 +75,7 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
     user = {
-      _id: user_id,
+      _id: user._id,
       fullname: user.fullname,
       email: user.email,
       phoneNumber: user.phoneNumber,
@@ -112,15 +112,11 @@ export const updateProfile = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
     const file = req.file;
-    //checking if all fields are present
-    if (!fullname || !email || !phoneNumber || !bio || !skills) {
-      return res.status(400).json({
-        message: "Something is missing",
-        success: false,
-      });
+    //cloudinary later
+    let skillsArray;
+    if(skills){
+      skillsArray = skills.split(",");
     }
-
-    const skillsArray = skills.split(",");
     const userId = req.id;
     let user = await User.findById(userId);
     //checking if user exists
@@ -131,18 +127,19 @@ export const updateProfile = async (req, res) => {
       });
     }
     //updating data
-    user.fullname = fullname;
-    user.email = email;
-    user.phoneNumber = phoneNumber;
-    user.profile.bio = bio;
-    user.profile.skills = skillsArray;
+    if(fullname) user.fullname = fullname;
+    if(email) user.email = email;
+    if(phoneNumber) user.phoneNumber = phoneNumber;
+    if(bio) user.profile.bio = bio;
+    if(skills) user.profile.skills = skillsArray;
+  
 
     //resume later
 
     await user.save();
 
     user = {
-      _id: user_id,
+      _id: user._id,
       fullname: user.fullname,
       email: user.email,
       phoneNumber: user.phoneNumber,
